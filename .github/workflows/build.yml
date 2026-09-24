@@ -1,16 +1,19 @@
 name: build
 
 on:
+  push:
+    branches: ['*']
   workflow_dispatch:
     inputs:
       subversion:
-        description: 'Sub-version (eg: 46)'
-        required: true
+        description: 'Sub-version (eg: 56)'
+        required: false
+        default: '56'
         type: string
       platform:
         description: 'Target platform to build for'
         required: true
-        default: 'Multi-platform'
+        default: 'All'
         type: choice
         options:
         - Android
@@ -22,7 +25,7 @@ on:
 jobs:
   windows:
     runs-on: windows-2022
-    if:  ${{ (github.event.inputs.platform == 'Windows') || (github.event.inputs.platform == 'All') }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.platform == 'Windows' || github.event.inputs.platform == 'All' }}
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-python@v7
@@ -37,14 +40,16 @@ jobs:
     - run: pip install -r requirements.txt
     - run: |
         .\build.bat setup
-        .\build.bat pack -p windows -v ${{ inputs.subversion }} --no-zip
+        .\build.bat pack -p windows -v ${{ inputs.subversion || '56' }}
     - uses: actions/upload-artifact@v4
       with:
-        name: newb-x-windows
-        path: ./build/pack-windows
+        name: newb-x-dark-horror-windows
+        path: |
+          ./build/*.mcpack
+          ./build/pack-windows
   android:
     runs-on: ubuntu-latest
-    if:  ${{ (github.event.inputs.platform == 'Android') || (github.event.inputs.platform == 'All') }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.platform == 'Android' || github.event.inputs.platform == 'All' }}
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-python@v7
@@ -59,14 +64,16 @@ jobs:
     - run: pip install -r requirements.txt
     - run: |
         ./build.sh setup
-        ./build.sh pack -p android -v ${{ inputs.subversion }} --no-zip
+        ./build.sh pack -p android -v ${{ inputs.subversion || '56' }}
     - uses: actions/upload-artifact@v4
       with:
-        name: newb-x-android
-        path: ./build/pack-android
+        name: newb-x-dark-horror-android
+        path: |
+          ./build/*.mcpack
+          ./build/pack-android
   ios:
     runs-on: ubuntu-latest
-    if:  ${{ (github.event.inputs.platform == 'iOS') || (github.event.inputs.platform == 'All') }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.platform == 'iOS' || github.event.inputs.platform == 'All' }}
     steps:
     - uses: actions/checkout@v7
       with:
@@ -83,14 +90,16 @@ jobs:
     - run: pip install -r requirements.txt
     - run: |
         ./build.sh setup
-        ./build.sh pack -p ios -v ${{ inputs.subversion }} --no-zip
+        ./build.sh pack -p ios -v ${{ inputs.subversion || '56' }}
     - uses: actions/upload-artifact@v4
       with:
-        name: newb-x-ios
-        path: ./build/pack-ios
+        name: newb-x-dark-horror-ios
+        path: |
+          ./build/*.mcpack
+          ./build/pack-ios
   multiplatform:
     runs-on: windows-2022
-    if:  ${{ (github.event.inputs.platform == 'Multi-platform') || (github.event.inputs.platform == 'All')}}
+    if: ${{ github.event_name == 'push' || github.event.inputs.platform == 'Multi-platform' || github.event.inputs.platform == 'All' }}
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-python@v7
@@ -105,8 +114,10 @@ jobs:
     - run: pip install -r requirements.txt
     - run: |
         .\build.bat setup
-        .\build.bat pack -p multiplatform -v ${{ inputs.subversion }} --no-zip
+        .\build.bat pack -p multiplatform -v ${{ inputs.subversion || '56' }}
     - uses: actions/upload-artifact@v4
       with:
-        name: newb-x-multiplatform
-        path: ./build/pack-multiplatform
+        name: newb-x-dark-horror-multiplatform
+        path: |
+          ./build/*.mcpack
+          ./build/pack-multiplatform

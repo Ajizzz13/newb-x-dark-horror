@@ -61,6 +61,9 @@ void main() {
   #endif 
 
   vec3 light = texture2D(s_LightingTexture, lightingUV).rgb;
+  #ifdef NL_WEATHER_NIGHT_GLOW
+    light = max(light, vec3_splat(NL_WEATHER_NIGHT_GLOW));
+  #endif
 
   diffuse.rgb *= diffuse.rgb*light;
   diffuse.rgb += 3.0*v_fog.rgb;
