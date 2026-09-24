@@ -7,8 +7,7 @@ on:
     inputs:
       subversion:
         description: 'Sub-version (eg: 56)'
-        required: false
-        default: '56'
+        default: '57'
         type: string
 
 permissions:
@@ -39,7 +38,7 @@ jobs:
     - name: Build Android shader pack
       run: |
         ./build.sh setup
-        ./build.sh pack -p android -v ${{ inputs.subversion || '56' }}
+        ./build.sh pack -p android -v ${{ inputs.subversion || '57' }}
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -52,8 +51,8 @@ jobs:
     - name: Publish GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v0.16.56-horror
-        name: "Newb X - Dark Horror (Android)"
+        tag_name: v0.16.57-horror
+        name: "Newb X - Dark Horror v0.16.57 (Android)"
         body: |
           ### 🌑 Newb X Legacy - Dark Horror Edition
           A dark, atmospheric horror shader for Minecraft Bedrock Edition (Android).
