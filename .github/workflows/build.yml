@@ -10,114 +10,66 @@ on:
         required: false
         default: '56'
         type: string
-      platform:
-        description: 'Target platform to build for'
-        required: true
-        default: 'All'
-        type: choice
-        options:
-        - Android
-        - Windows
-        - iOS
-        - Multi-platform
-        - All
+
+permissions:
+  contents: write
 
 jobs:
-  windows:
-    runs-on: windows-2022
-    if: ${{ github.event_name == 'push' || github.event.inputs.platform == 'Windows' || github.event.inputs.platform == 'All' }}
-    steps:
-    - uses: actions/checkout@v7
-    - uses: actions/setup-python@v7
-      with:
-        python-version: '3.14' 
-        cache: 'pip'
-    - uses: actions/cache@v6
-      with:
-        key: env-files-win-laz
-        path: |
-          ${{ github.workspace }}/tool/data
-    - run: pip install -r requirements.txt
-    - run: |
-        .\build.bat setup
-        .\build.bat pack -p windows -v ${{ inputs.subversion || '56' }}
-    - uses: actions/upload-artifact@v4
-      with:
-        name: newb-x-dark-horror-windows
-        path: |
-          ./build/*.mcpack
-          ./build/pack-windows
   android:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event.inputs.platform == 'Android' || github.event.inputs.platform == 'All' }}
     steps:
     - uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
     - uses: actions/setup-python@v7
       with:
-        python-version: '3.14' 
+        python-version: '3.14'
         cache: 'pip'
+
     - uses: actions/cache@v6
       with:
         key: env-files-linux-laz
         path: |
           ${{ github.workspace }}/tool/data
-    - run: pip install -r requirements.txt
-    - run: |
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Build Android shader pack
+      run: |
         ./build.sh setup
         ./build.sh pack -p android -v ${{ inputs.subversion || '56' }}
-    - uses: actions/upload-artifact@v4
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
       with:
         name: newb-x-dark-horror-android
         path: |
           ./build/*.mcpack
           ./build/pack-android
-  ios:
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event.inputs.platform == 'iOS' || github.event.inputs.platform == 'All' }}
-    steps:
-    - uses: actions/checkout@v7
+
+    - name: Publish GitHub Release
+      uses: softprops/action-gh-release@v2
       with:
-        fetch-depth: 0
-    - uses: actions/setup-python@v7
-      with:
-        python-version: '3.14' 
-        cache: 'pip'
-    - uses: actions/cache@v6
-      with:
-        key: env-files-linux-laz
-        path: |
-          ${{ github.workspace }}/tool/data
-    - run: pip install -r requirements.txt
-    - run: |
-        ./build.sh setup
-        ./build.sh pack -p ios -v ${{ inputs.subversion || '56' }}
-    - uses: actions/upload-artifact@v4
-      with:
-        name: newb-x-dark-horror-ios
-        path: |
-          ./build/*.mcpack
-          ./build/pack-ios
-  multiplatform:
-    runs-on: windows-2022
-    if: ${{ github.event_name == 'push' || github.event.inputs.platform == 'Multi-platform' || github.event.inputs.platform == 'All' }}
-    steps:
-    - uses: actions/checkout@v7
-    - uses: actions/setup-python@v7
-      with:
-        python-version: '3.14' 
-        cache: 'pip'
-    - uses: actions/cache@v6
-      with:
-        key: env-files-win-laz
-        path: |
-          ${{ github.workspace }}/tool/data
-    - run: pip install -r requirements.txt
-    - run: |
-        .\build.bat setup
-        .\build.bat pack -p multiplatform -v ${{ inputs.subversion || '56' }}
-    - uses: actions/upload-artifact@v4
-      with:
-        name: newb-x-dark-horror-multiplatform
-        path: |
-          ./build/*.mcpack
-          ./build/pack-multiplatform
+        tag_name: v0.16.56-horror
+        name: "Newb X - Dark Horror (Android)"
+        body: |
+          ### 🌑 Newb X Legacy - Dark Horror Edition
+          A dark, atmospheric horror shader for Minecraft Bedrock Edition (Android).
+
+          #### ✨ Features:
+          - **Siang Terang + Fog & Bayangan Ekstrem**: Sinar matahari terik pucat dengan kabut tebal merayap (*Silent Hill mist*) dan bayangan sangat pekat (0.98 intensity).
+          - **Malam Sangat Gelap Gulita**: Cahaya bulan redup minimal, ambient boost ditekan ke 0.10.
+          - **Obor Penyelamat**: Api obor berkedip-kedip (*flickering torch*) dengan kontras tinggi di kegelapan.
+          - **Ore Bersinar Terang**: Pendaran bijih 5.5x lipat dilengkapi denyut halus (*pulsing shimmer*) dan pendaran aura ke blok sekeliling (*bloom leak*).
+          - **Partikel Malam**: Partikel rintik hujan dan salju memancarkan pendar cahaya redup di kegelapan.
+          - **Kompatibilitas**: Mendukung Minecraft Bedrock 1.21.0 s/d 1.26+ tanpa batasan `min_engine_version`.
+
+          #### 📥 Cara Pasang:
+          1. Unduh file **`.mcpack`** di bagian Assets di bawah ini.
+          2. Buka file tersebut dengan Minecraft (atau import via MB Loader / file manager).
+          3. Aktifkan di **Settings > Global Resources**.
+        files: ./build/*.mcpack
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

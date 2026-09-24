@@ -1,6 +1,6 @@
 name = "Newb X - Dark Horror"
 version = [0, 16, 56]
-min_supported_mc_version = [1, 26, 50]
+min_supported_mc_version = [1, 21, 0]
 description = '''
 §c%w
 §4[Horror Edition] §7Dark atmospheric shader: dense fog, pitch shadows, pitch black nights, and glowing ores & night particles.
